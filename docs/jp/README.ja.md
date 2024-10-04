@@ -218,6 +218,11 @@ sudo usermod -aG video $USERNAME
 python infer-web.py
 ```
 
+簡単な認証が必要な場合
+```
+python inter-web.py --gradio-auth 'admin:admin'
+```
+
 ### 統合パッケージの使用
 
 `RVC-beta.7z`をダウンロードして解凍

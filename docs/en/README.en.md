@@ -185,6 +185,11 @@ Use the following command to start WebUI:
 ```bash
 python infer-web.py
 ```
+If you need simple authentication to protect your server:
+```
+python inter-web.py --gradio-auth 'admin:admin'
+```
+
 ### Use the integration package
 Download and extract file `RVC-beta.7z`, then follow the steps below according to your system:
 #### For Windows users

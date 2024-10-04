@@ -178,6 +178,11 @@ sudo usermod -aG video $USERNAME
 python infer-web.py
 ```
 
+需要简单的认证保护
+```bash
+python inter-web.py --gradio-auth 'admin:admin'
+```
+
 若先前使用 Poetry 安装依赖，则可以通过以下方式启动WebUI
 ```bash
 poetry run python infer-web.py
