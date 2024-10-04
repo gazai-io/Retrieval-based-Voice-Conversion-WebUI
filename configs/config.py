@@ -57,10 +57,18 @@ class Config:
             self.noparallel,
             self.noautoopen,
             self.dml,
+            self.gradio_auth,
         ) = self.arg_parse()
         self.instead = ""
         self.preprocess_per = 3.7
         self.x_pad, self.x_query, self.x_center, self.x_max = self.device_config()
+
+        if self.gradio_auth:
+            self.gradio_auth = self.gradio_auth.split(":")
+            self.gradio_auth = {
+                "username": self.gradio_auth[0],
+                "password": self.gradio_auth[1],
+            }
 
     @staticmethod
     def load_config_json() -> dict:
@@ -93,6 +101,13 @@ class Config:
             action="store_true",
             help="torch_dml",
         )
+        # gradio-auth
+        parser.add_argument(
+            "--gradio-auth",
+            type=str,
+            default=None,
+            help="Gradio authentication username:password",
+        )
         cmd_opts = parser.parse_args()
 
         cmd_opts.port = cmd_opts.port if 0 <= cmd_opts.port <= 65535 else 7865
@@ -104,6 +119,7 @@ class Config:
             cmd_opts.noparallel,
             cmd_opts.noautoopen,
             cmd_opts.dml,
+            cmd_opts.gradio_auth,
         )
 
     # has_mps is only available in nightly pytorch (for now) and MasOS 12.3+.
