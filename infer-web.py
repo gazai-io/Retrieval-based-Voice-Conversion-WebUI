@@ -1616,4 +1616,5 @@ with gr.Blocks(title="RVC WebUI") as app:
             inbrowser=not config.noautoopen,
             server_port=config.listen_port,
             quiet=True,
+            auth=(config.gradio_auth["username"], config.gradio_auth["password"]) if config.gradio_auth else None,
         )
