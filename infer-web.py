@@ -222,7 +222,7 @@ def preprocess_dataset(trainset_dir, exp_dir, sr, n_p):
     f.close()
     cmd = '"%s" infer/modules/train/preprocess.py "%s" %s %s "%s/logs/%s" %s %.1f' % (
         config.python_cmd,
-        f"{config.trainset_dir}/{trainset_dir}",
+        os.path.join(config.trainset_dir, trainset_dir),
         sr,
         n_p,
         now_dir,
