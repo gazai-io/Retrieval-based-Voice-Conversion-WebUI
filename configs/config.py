@@ -57,6 +57,8 @@ class Config:
             self.noparallel,
             self.noautoopen,
             self.dml,
+            self.trainset_dir,
+            self.folder_for_files_to_process,
         ) = self.arg_parse()
         self.instead = ""
         self.preprocess_per = 3.7
@@ -93,7 +95,23 @@ class Config:
             action="store_true",
             help="torch_dml",
         )
+        parser.add_argument(
+            "--trainset_dir",
+            type=str,
+            default="assets/train_datasets/input",
+            help="Directory for training dataset",
+        )
+        parser.add_argument(
+            "--folder_for_files_to_process",
+            type=str,
+            default="assets/audios/input",
+            help="Directory for files to process",
+        )
         cmd_opts = parser.parse_args()
+
+        # Create trainset_dir and folder_for_files_to_process if they don't exist
+        os.makedirs(cmd_opts.trainset_dir, exist_ok=True)
+        os.makedirs(cmd_opts.folder_for_files_to_process, exist_ok=True)
 
         cmd_opts.port = cmd_opts.port if 0 <= cmd_opts.port <= 65535 else 7865
 
@@ -104,6 +122,8 @@ class Config:
             cmd_opts.noparallel,
             cmd_opts.noautoopen,
             cmd_opts.dml,
+            cmd_opts.trainset_dir,
+            cmd_opts.folder_for_files_to_process,
         )
 
     # has_mps is only available in nightly pytorch (for now) and MasOS 12.3+.
