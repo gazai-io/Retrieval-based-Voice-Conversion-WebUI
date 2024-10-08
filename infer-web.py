@@ -842,18 +842,43 @@ with gr.Blocks(title="RVC WebUI") as app:
                                 label=i18n("变调(整数, 半音数量, 升八度12降八度-12)"),
                                 value=0,
                             )
-                            input_audio0 = gr.Textbox(
+                            input_audio0 = gr.UploadButton(
                                 label=i18n(
                                     "输入待处理音频文件路径(默认是正确格式示例)"
                                 ),
-                                placeholder="C:\\Users\\Desktop\\audio_example.wav",
+                                file_types=["audio"],
                             )
-                            file_index1 = gr.Textbox(
+                            input_audio0_info = gr.Textbox(
+                                label=i18n("音频文件路径"),
+                                placeholder=os.path.join(config.folder_for_files_to_process, "input.wav"),
+                                interactive=True,
+                            )
+                            def save_uploaded_files(file):
+                                shutil.copy(file.name, config.folder_for_files_to_process)
+                                final_path = os.path.join(config.folder_for_files_to_process, os.path.basename(file.name))
+
+                                return gr.update(value=final_path)
+                            input_audio0.upload(
+                                fn=save_uploaded_files,
+                                inputs=[input_audio0],
+                                outputs=[input_audio0_info],
+                            )
+                            file_index1 = gr.UploadButton(
                                 label=i18n(
                                     "特征检索库文件路径,为空则使用下拉的选择结果"
                                 ),
-                                placeholder="C:\\Users\\Desktop\\model_example.index",
+                            )
+                            file_index1_info = gr.Textbox(
+                                label=i18n(
+                                    "特征检索库路径"
+                                ),
+                                placeholder=os.path.join(config.folder_for_files_to_process, "model.index"),
                                 interactive=True,
+                            )
+                            file_index1.upload(
+                                fn=save_uploaded_files,
+                                inputs=[file_index1],
+                                outputs=[file_index1_info],
                             )
                             file_index2 = gr.Dropdown(
                                 label=i18n("自动检测index路径,下拉式选择(dropdown)"),
@@ -949,11 +974,11 @@ with gr.Blocks(title="RVC WebUI") as app:
                             vc.vc_single,
                             [
                                 spk_item,
-                                input_audio0,
+                                input_audio0_info,
                                 vc_transform0,
                                 f0_file,
                                 f0method0,
-                                file_index1,
+                                file_index1_info,
                                 file_index2,
                                 # file_big_npy1,
                                 index_rate1,
