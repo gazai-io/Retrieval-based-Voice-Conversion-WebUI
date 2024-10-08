@@ -222,7 +222,7 @@ def preprocess_dataset(trainset_dir, exp_dir, sr, n_p):
     f.close()
     cmd = '"%s" infer/modules/train/preprocess.py "%s" %s %s "%s/logs/%s" %s %.1f' % (
         config.python_cmd,
-        trainset_dir,
+        f"{config.trainset_dir}/{trainset_dir}",
         sr,
         n_p,
         now_dir,
@@ -1210,10 +1210,89 @@ with gr.Blocks(title="RVC WebUI") as app:
                     )
                 )
                 with gr.Row():
-                    trainset_dir4 = gr.Textbox(
-                        label=i18n("输入训练文件夹路径"),
-                        value=i18n("E:\\语音音频+标注\\米津玄师\\src"),
+                    with gr.Column():
+                        def get_trainset_dirs():
+                            if hasattr(config, 'trainset_dir') and config.trainset_dir:
+                                return [os.path.basename(d) for d in os.listdir(config.trainset_dir) if os.path.isdir(os.path.join(config.trainset_dir, d))]
+                            return []
+
+                        trainset_dirs = get_trainset_dirs()
+                        
+                        trainset_dir4 = gr.Dropdown(
+                            label=i18n("选择训练文件夹"),
+                            choices=trainset_dirs + [i18n("创建新文件夹")],
+                            interactive=True,
+                        )
+
+                        new_folder_name = gr.Textbox(
+                            label=i18n("新文件夹名称"),
+                            visible=False
+                        )
+                        create_folder_button = gr.Button(
+                            i18n("创建文件夹"),
+                            visible=False
+                        )
+
+                        upload4 = gr.UploadButton(
+                            label=i18n('上传到文件夹'),
+                            file_count='multiple',
+                            file_types=['audio', 'archive'],
+                        )
+
+                        upload4_result = gr.Textbox(label=i18n("上传結果"), visible=False)
+
+                        def save_uploaded_files(files, selected_dir):
+                            if selected_dir == i18n("创建新文件夹"):
+                                return gr.update(value=i18n("请先选择或创建一个文件夹"), visible=True)
+
+                            if selected_dir == '':
+                                return gr.update(value=i18n("请先选择或创建一个文件夹"), visible=True)
+                            
+                            save_dir = os.path.join(config.trainset_dir, selected_dir)
+                            if not os.path.exists(save_dir):
+                                os.makedirs(save_dir)
+                            
+                            for file in files:
+                                file_path = file.name
+                                shutil.copy(file_path, save_dir)
+                            
+                            return gr.update(value=i18n("文件已保存"), visible=True)
+
+                        upload4.upload(
+                            fn=save_uploaded_files,
+                            inputs=[upload4, trainset_dir4],
+                            outputs=[upload4_result]
+                        )
+
+                    def show_new_folder_input(choice):
+                        if choice == i18n("创建新文件夹"):
+                            return gr.update(visible=True), gr.update(visible=True), gr.update(visible=False)
+                        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
+
+                    trainset_dir4.change(
+                        show_new_folder_input,
+                        inputs=[trainset_dir4],
+                        outputs=[new_folder_name, create_folder_button, upload4_result]
                     )
+
+                    def create_new_folder(name):
+                        if not name:
+                            return gr.update(value=i18n("请输入文件夹名称")), gr.update(choices=trainset_dirs + [i18n("创建新文件夹")])
+                        
+                        new_path = os.path.join(config.trainset_dir, name)
+                        if os.path.exists(new_path):
+                            return gr.update(value=i18n("文件夹已存在")), gr.update(choices=trainset_dirs + [i18n("创建新文件夹")])
+                        
+                        os.makedirs(new_path)
+                        new_trainset_dirs = get_trainset_dirs()
+                        return gr.update(value=""), gr.update(choices=new_trainset_dirs + [i18n("创建新文件夹")], value=name)
+
+                    create_folder_button.click(
+                        create_new_folder,
+                        inputs=[new_folder_name],
+                        outputs=[new_folder_name, trainset_dir4]
+                    )
+
                     spk_id5 = gr.Slider(
                         minimum=0,
                         maximum=4,
