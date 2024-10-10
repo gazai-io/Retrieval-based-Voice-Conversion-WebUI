@@ -816,7 +816,22 @@ with gr.Blocks(title="RVC WebUI") as app:
     with gr.Tabs():
         with gr.TabItem(i18n("模型推理")):
             with gr.Row():
-                sid0 = gr.Dropdown(label=i18n("推理音色"), choices=sorted(names))
+                with gr.Column():
+                    sid0 = gr.Dropdown(label=i18n("推理音色"), choices=sorted(names))
+                    upload_model = gr.UploadButton(label=i18n("上传音色模型"), file_types=['.pth'])
+
+                def upload_voice_model(file):
+                    if file:
+                        filename = file.name
+
+                        if filename.endswith('.pth'):
+                            shutil.copy(file.name, os.path.join(weight_root, os.path.basename(filename)))
+
+                        return gr.update(choices=change_choices()[0]['choices'])
+                    return gr.update()
+
+                upload_model.upload(fn=upload_voice_model, inputs=[upload_model], outputs=[sid0])
+
                 with gr.Column():
                     refresh_button = gr.Button(
                         i18n("刷新音色列表和索引路径"), variant="primary"
